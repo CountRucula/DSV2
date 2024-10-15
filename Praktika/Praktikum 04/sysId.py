@@ -23,7 +23,7 @@ h = scipy.signal.firwin(N_FIR+1, fs=fs, cutoff=8000)
 
 
 # LMS parameter initialization
-mu = 0.1 * mu_max  # Try mu=0.1*mu_max (rule of thumb)
+mu = 0.5 * mu_max  # Try mu=0.1*mu_max (rule of thumb)
 b = np.zeros(N_FIR + 1)  # Initial coefficients of adaptive filter
 xn_vec = np.zeros(N_FIR + 1, dtype=float)  # Samples in FIR-Tapped-Delay-Line
 e = np.zeros(Niter)
@@ -34,6 +34,22 @@ y = np.zeros(Niter)
 
 plt.ion()
 fig, (ax1, ax2, ax3) = plt.subplots(3,1)
+
+ax1.set_title('Filter-Koeffizienten')
+ax1.grid(True)
+ax1.plot(h, '.')
+
+ax2.set_title('gelernte Koeffizienten')
+ax2.grid(True)
+ax2.set_ylim((-0.1, 0.35))
+line1, = ax2.plot(b, '.')
+
+ax3.set_title('Error-Quadrat')
+ax3.grid(True)
+ax3.set_ylim((0, 1))
+line2, = ax3.plot(e**2)
+
+plt.tight_layout()
 
 for n in range(Niter):
     # gen new value
@@ -57,25 +73,13 @@ for n in range(Niter):
     e[n] = d[n] - y[n]
 
     # calc b[n+1]
-    for k in range(N_FIR):
-        b[k] = b[k] + 2*mu*e[n]*x[k]
+    #for k in range(N_FIR):
+        #b[k] = b[k] + 2*mu*e[n]*x[k]
+    b += 2*mu*e[n]*x
 
-    ax1.clear()
-    ax1.set_title('Filter-Koeffizienten')
-    ax1.plot(h, '.')
-    ax1.grid(True)
+    line1.set_ydata(b)
+    line2.set_ydata(e**2)
 
-    ax2.clear()
-    ax2.set_title('gelernte Koeffizienten')
-    ax2.plot(b, '.')
-    ax2.grid(True)
-
-    ax3.clear()
-    ax3.set_title('Error-Quadrat')
-    ax3.plot(e**2)
-    ax3.grid(True)
-
-    plt.tight_layout()
     plt.pause(0.003)
     
     
